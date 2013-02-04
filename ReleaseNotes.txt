@@ -1,0 +1,16 @@
+Release Notes
+==============
+
+Add:
+	o Added the ability to add or update data to the relational database with this extension
+	o Kept the open-world assumption by adding a Jena RDB model to the same relational database schema. This allows the addition of arbitrary triples as well as data that is rejected by the relational database
+
+Remove:
+	o Added the ability to remove data from the relational database or the RDB model
+
+Blank Nodes:
+	o Added the ability to construct arbitrary blank nodes based on various relational database columns
+
+Known Issues:
+	o The use of a Jena RDB model in the same relational database schema
+	o Performing DML operations when a relational database table has multiple primary keys

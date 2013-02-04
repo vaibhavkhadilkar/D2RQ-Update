@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ ! -e "./d2r++-server" ]
+then
+  echo "Please cd into the D2R++ Server directory to run the server"
+  exit 1
+fi
+D2RQRW_ROOT=${0%/*}
+CP="$D2RQRW_ROOT/build"
+SEP=':'
+if [ "$(uname)" = "Cygwin" ]; then SEP=';'; fi
+for jar in "$D2RQRW_ROOT"/lib/*.jar "$D2RQRW_ROOT"/lib/*/*.jar
+do
+  if [ ! -e "$jar" ]; then continue; fi
+  CP="$CP$SEP$jar"
+done
+LOGCONFIG=${LOGCONFIG:-file:$D2RQRW_ROOT/etc/log4j.properties}
+exec java -cp "$CP" -Xmx256M "-Dlog4j.configuration=${LOGCONFIG}" edu.utdallas.d2rrw.ExtendedServer "$@"
