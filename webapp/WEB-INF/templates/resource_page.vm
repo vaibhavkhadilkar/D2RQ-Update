@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+    	<title>
+			#if ($label)
+      			$label.string | $server_name
+			#else
+      			Description of $uri | $server_name
+			#end
+    	</title>
+    	<link rel="stylesheet" type="text/css" href="${home_link}snorql/style.css" />
+    	<link rel="alternate" type="application/rdf+xml" href="$rdf_link?output=rdfxml" title="This page in RDF (XML)" />
+    	<link rel="alternate" type="text/rdf+n3" href="$rdf_link?output=n3" title="This page in RDF (N3)" />
+  	</head>
+  	<body class="browser">
+    	<div id="rdficon"><a href="$rdf_link" title="RDF data"><img src="${home_link}snorql/rdf_flyer.24.gif" alt="[RDF data]" /></a></div>
+
+    	<div id="header">
+      		<h1 id="title">
+				#if ($label)
+      				$label.string
+				#else
+      				Description of $uri
+				#end
+      		</h1>
+      		<div class="subtitle">Resource URI: $uri</div>
+    	</div>
+
+	    <div class="section">
+      		<strong><a href="$home_link">Home</a></strong>
+				#if (!$classmap_links.isEmpty())
+      				| 
+					#foreach ($classmap in $classmap_links.keySet())
+      					<strong><a href="$classmap_links.get($classmap)">
+						#if ($truncated_results)
+        					Example
+						#else
+        					All
+						#end
+        				$classmap
+      					</a></strong>
+					#end
+				#end
+    	</div>
+    	<div class="section">
+			#if (!$properties.isEmpty())
+				<form name="remove">
+	      			<table class="queryresults">
+    	    			<tr><th>Choose</th><th>Property</th><th>Value</th></tr>
+						#foreach ($property in $properties)
+							#if ($velocityCount % 2 == 0)
+								#set ($odd_even = "even")
+							#else
+								#set ($odd_even = "odd")
+							#end
+	        				<tr class="$odd_even">
+    	    					<td class="property">
+        							#if (!$property.propertyURI().contains("www.w3.org"))
+										#if ($property.valueQName())
+           									<input type="radio" name="group1" value="$property.propertyURI()~~$property.valueQName()~~qname" /> 
+										#elseif ($property.value().isURI())
+           									<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().URI~~uri" /> 
+										#elseif ($property.value().isBlank())
+           									<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().BlankNodeLabel~~blank" /> 
+										#elseif ($property.value().isLiteral() && $property.value().LiteralDatatype && $property.value().LiteralLanguage != "")
+											<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().LiteralLexicalForm~~literal~~$property.datatypeQName()~~$property.value().LiteralLanguage" />
+										#elseif ($property.value().isLiteral() && $property.value().LiteralDatatype)
+											<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().LiteralLexicalForm~~literal~~$property.datatypeQName()~~null" />
+										#elseif ($property.value().isLiteral() && $property.value().LiteralLanguage != "")
+											<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().LiteralLexicalForm~~literal~~null~~$property.value().LiteralLanguage" />
+										#elseif ($property.value().isLiteral())
+											<input type="radio" name="group1" value="$property.propertyURI()~~$property.value().LiteralLexicalForm~~literal~~null~~null" />
+										#end
+									#end
+	        					</td>
+    	    					<td class="property">
+									#if ($property.isInverse())
+            							<small>is</small>
+									#end
+									#if ($property.propertyPrefix())
+            							<a class="uri" href="$property.propertyURI()" title="$property.propertyURI()"><small>$property.propertyPrefix()</small>$property.propertyLocalName()</a>
+									#else
+            							<a class="uri" href="$property.propertyURI()" title="$property.propertyURI()"><small>?:</small>$property.propertyLocalName()</a>
+									#end	
+									#if ($property.isInverse())
+	            						<small>of</small>
+									#end
+        	  					</td>
+          						<td>
+          							<form>
+										#if ($property.valueQName())
+           									<a class="uri" href="$property.value().URI">$property.valueQName()</a>
+										#elseif ($property.value().isURI())
+           									<small>&lt;</small><a class="uri" href="$property.value().URI">$property.value().URI</a><small>&gt;</small>
+										#elseif ($property.value().isBlank())
+          									<span class="blank">$property.getBlankNodeLabel()</span>
+										#elseif ($property.value().isLiteral())
+    	       								<span class="literal">$property.value().LiteralLexicalForm</span>
+										#if ($property.value().LiteralDatatype)
+            								<span class="literal"><small>($property.datatypeQName())</small></span>
+										#end	
+										#if ($property.value().LiteralLanguage != "")
+            								<span class="literal"><small>($property.value().LiteralLanguage)</small></span>
+										#end
+										#end
+									</form> 
+	          					</td>
+    	    				</tr>
+						#end
+      				</table>
+      				<input type="submit" value="Remove" />
+      			</form>
+			#else
+      			<p>No textual description available.</p>
+			#end
+    	</div>
+    	<div class="section">
+			<form name="add">
+				<table id="prefixestext">
+					#foreach ($prefix in $prefixes.keySet())
+						<tr>PREFIX $prefix: $prefixes.get($prefix)</tr>
+					#end
+					<tr><input type="text" name="group2" size="50" value="Enter the predicate and object to add separated by '~~'" /> </tr>
+      				<tr><input type="submit" value="Add" /></tr>
+      			</table>
+			</form>    		
+    	</div>
+    	<div id="footer">Generated by <a href="http://cs.utdallas.edu/semanticweb/">D2R++ Server</a></div>
+  	</body>
+</html>

@@ -1,0 +1,85 @@
+<project name="D2RQ++" basedir=".">
+	
+	<!-- Properties file for build.xml -->
+	<property file="build.properties" />
+
+	<!-- Clean directories -->
+	<target name="clean" description="remove all contents to ensure a clean build">
+		<delete dir="${d2rq++.classes.dir}" />
+	</target>
+
+	<!-- Initialize -->
+	<target name="init">
+		<mkdir dir="${d2rq++.classes.dir}" />
+		<tstamp/>
+	</target>
+
+	<!-- Compile source classes -->
+	<target name="compile-src-d2rq++-classes" depends="init" description="Compile the copied D2RQ++ source tree under ${d2rq++.classes.dir}">
+		<javac
+			srcdir="${d2rq++.dir}"
+			destdir="${d2rq++.classes.dir}"
+			debug="true"
+		>
+		<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<!-- Create the new patch -->
+	<target name="create-d2rq-patch" depends="init, compile-src-d2rq++-classes" description="Create the new D2RQ patch based on the modified files">
+        	<jar
+                	destfile="${lib.dir}/patch_d2rq.jar"
+                	basedir="${d2rq++.classes.dir}">
+		</jar>
+	</target>
+	
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="*.jar" />
+	</path>
+
+	<path id="run-classpath">
+		<fileset dir="${examples.classes.dir}" />		
+	</path>
+
+	<!-- Compile the source examples -->
+	<target name="compile-test-classes" depends="init, compile-src-d2rq++-classes, create-d2rq-patch" description="Compile the test source files under ${examples.dir}">
+        	<javac 
+                	srcdir="${examples.dir}"
+                	destdir="${examples.classes.dir}" >
+                	<classpath refid="classpath" />
+        	</javac>
+  	</target>
+
+	<target name="run-d2rq++" depends="compile-test-classes">
+        	<java classname="${run.d2rq++}" maxmemory="1g" fork="yes">
+                	<classpath refid="classpath" />
+                	<classpath refid="run-classpath" />
+                	<jvmarg value="-XX:-UseGCOverheadLimit" />
+                	<jvmarg value="-Xms1g" />
+                	<jvmarg value="-XX:+UseConcMarkSweepGC" />
+                	<arg line="/home/vaibhav/employee.n3"/>
+        	</java>
+  	</target>
+
+	<target name="run-d2rq++-sparql" depends="compile-test-classes">
+        	<java classname="${run.d2rq++.sparql}" maxmemory="1g" fork="yes">
+                	<classpath refid="classpath" />
+                	<classpath refid="run-classpath" />
+                	<jvmarg value="-XX:-UseGCOverheadLimit" />
+                	<jvmarg value="-Xms1g" />
+                	<jvmarg value="-XX:+UseConcMarkSweepGC" />
+                	<arg line="/home/vaibhav/employee.n3"/>
+        	</java>
+  	</target>
+
+	<target name="run-d2rq++-anon" depends="compile-test-classes">
+        	<java classname="${run.d2rq++.anon}" maxmemory="1g" fork="yes">
+                	<classpath refid="classpath" />
+                	<classpath refid="run-classpath" />
+                	<jvmarg value="-XX:-UseGCOverheadLimit" />
+                	<jvmarg value="-Xms1g" />
+                	<jvmarg value="-XX:+UseConcMarkSweepGC" />
+                	<arg line="/home/vaibhav/employee.n3"/>
+        	</java>
+  	</target>
+</project>
